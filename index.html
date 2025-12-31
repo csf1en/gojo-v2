@@ -1,0 +1,907 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>/gojo — Next Gen Discord Companion</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #050507;
+            --bg-panel: rgba(255, 255, 255, 0.03);
+            --bg-panel-hover: rgba(255, 255, 255, 0.07);
+            --primary: #3a86ff;
+            --secondary: #4cc9f0;
+            --accent: #7209b7;
+            --text-main: #ffffff;
+            --text-muted: #94a3b8;
+            --border: rgba(255, 255, 255, 0.08);
+            --glass-blur: blur(16px);
+            --gradient: linear-gradient(135deg, var(--primary), var(--secondary));
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            overflow-x: hidden;
+            line-height: 1.6;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(58, 134, 255, 0.05) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(76, 201, 240, 0.05) 0%, transparent 40%);
+        }
+
+        h1, h2, h3 {
+            font-family: 'Outfit', sans-serif;
+            letter-spacing: -0.02em;
+        }
+
+        a { text-decoration: none; color: inherit; transition: 0.3s; }
+        ul { list-style: none; }
+
+        /* --- Navbar --- */
+        .navbar {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            padding: 1.2rem 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(5, 5, 7, 0.8);
+            backdrop-filter: blur(20px);
+            z-index: 1000;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--text-main);
+            z-index: 1001;
+        }
+
+        .logo img {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            object-fit: cover;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2.5rem;
+            background: var(--bg-panel);
+            padding: 0.5rem 2rem;
+            border-radius: 100px;
+            border: 1px solid var(--border);
+        }
+
+        .nav-links a {
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: var(--text-muted);
+        }
+
+        .nav-links a:hover { color: var(--text-main); }
+
+        .btn {
+            padding: 0.7rem 1.8rem;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 0 20px rgba(58, 134, 255, 0.3);
+        }
+
+        .btn-primary:hover {
+            background: var(--secondary);
+            transform: translateY(-2px);
+            box-shadow: 0 0 30px rgba(76, 201, 240, 0.5);
+        }
+
+        .btn-secondary {
+            background: rgba(255,255,255,0.05);
+            color: white;
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255,255,255,0.1);
+            border-color: rgba(255,255,255,0.3);
+        }
+
+        /* Mobile Menu Toggle */
+        .menu-toggle {
+            display: none;
+            font-size: 1.5rem;
+            color: var(--text-main);
+            cursor: pointer;
+            z-index: 1001;
+        }
+
+        /* --- Hero Section --- */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 120px 5% 50px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Moving Blob Animation Background */
+        .hero-blob {
+            position: absolute;
+            top: 50%;
+            right: 10%;
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, rgba(58, 134, 255, 0.3) 0%, rgba(76, 201, 240, 0) 70%);
+            filter: blur(50px);
+            z-index: 0;
+            animation: blobMove 10s infinite alternate;
+            border-radius: 50%;
+        }
+
+        @keyframes blobMove {
+            0% { transform: translate(0, 0) scale(1); }
+            100% { transform: translate(-30px, 30px) scale(1.1); }
+        }
+
+        .hero-content {
+            max-width: 600px;
+            z-index: 2;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 16px;
+            background: rgba(58, 134, 255, 0.1);
+            border: 1px solid rgba(58, 134, 255, 0.3);
+            border-radius: 100px;
+            font-size: 0.85rem;
+            color: var(--secondary);
+            margin-bottom: 2rem;
+            font-weight: 600;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--secondary);
+            border-radius: 50%;
+            box-shadow: 0 0 10px var(--secondary);
+            animation: pulse 2s infinite;
+        }
+
+        .hero h1 {
+            font-size: 4rem;
+            line-height: 1.1;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(to right, #fff, #a5b4fc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero p {
+            font-size: 1.15rem;
+            color: var(--text-muted);
+            margin-bottom: 2.5rem;
+            max-width: 90%;
+        }
+
+        .hero-visual {
+            position: relative;
+            width: 500px;
+            height: 400px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1;
+        }
+
+        /* 3D Floating Cards & Animation */
+        .float-card {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            border: 1px solid rgba(255,255,255,0.1);
+            animation: float 6s ease-in-out infinite;
+        }
+
+        /* Animated Gradient Card (Dashboard UI) */
+        .card-1 {
+            z-index: 2;
+            background: linear-gradient(125deg, rgba(255,255,255,0.05), rgba(255,255,255,0.01));
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+        }
+
+        /* Animated "Ball" inside the card */
+        .card-1::after {
+            content: '';
+            position: absolute;
+            top: -50%; left: -50%;
+            width: 200%; height: 200%;
+            background: radial-gradient(circle, rgba(58, 134, 255, 0.4), transparent 60%);
+            animation: rotateGradient 10s linear infinite;
+            z-index: -1;
+        }
+
+        .card-1-content {
+            z-index: 2;
+            color: white;
+            font-family: monospace;
+        }
+
+        .mock-bar {
+            height: 10px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 5px;
+            margin-bottom: 10px;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        .mock-fill {
+            height: 100%;
+            background: var(--gradient);
+            width: 60%;
+            animation: fillBar 3s ease-in-out infinite alternate;
+        }
+
+        @keyframes fillBar { from { width: 40%; } to { width: 80%; } }
+        @keyframes rotateGradient { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotateY(-10deg) rotateX(5deg); }
+            50% { transform: translateY(-20px) rotateY(-10deg) rotateX(5deg); }
+        }
+
+        .card-2 {
+            z-index: 1;
+            top: 30px;
+            left: 30px;
+            background: var(--gradient);
+            opacity: 0.15;
+            animation: float 6s ease-in-out infinite reverse;
+        }
+
+        /* --- Features --- */
+        .section { padding: 100px 5%; }
+
+        .section-header {
+            margin-bottom: 60px;
+            max-width: 600px;
+        }
+
+        .section-header h2 { font-size: 2.5rem; margin-bottom: 10px; }
+        .section-header .line {
+            width: 60px;
+            height: 4px;
+            background: var(--gradient);
+            border-radius: 2px;
+            margin-top: 15px;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .feature-box {
+            background: var(--bg-panel);
+            border: 1px solid var(--border);
+            padding: 2.5rem;
+            border-radius: 24px;
+            transition: 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .feature-box:hover {
+            transform: translateY(-5px);
+            border-color: rgba(58, 134, 255, 0.3);
+        }
+
+        .f-icon {
+            width: 50px;
+            height: 50px;
+            background: rgba(58, 134, 255, 0.1);
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            border-radius: 12px;
+            margin-bottom: 1.5rem;
+        }
+
+        /* --- Game Section --- */
+        .game-wrapper {
+            background: #0f1014;
+            border: 1px solid var(--border);
+            border-radius: 30px;
+            padding: 40px;
+            text-align: center;
+            box-shadow: inset 0 0 50px rgba(0,0,0,0.5);
+        }
+
+        .game-area {
+            height: 320px;
+            background: #050507;
+            border-radius: 16px;
+            margin-top: 30px;
+            position: relative;
+            cursor: none;
+            overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .player {
+            font-size: 2.5rem;
+            position: absolute;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+        }
+
+        .item { position: absolute; font-size: 1.8rem; }
+
+        .game-overlay {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(5, 5, 7, 0.85);
+            backdrop-filter: blur(5px);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 10;
+        }
+
+        /* --- Commands --- */
+        .cmd-section {
+            display: grid;
+            grid-template-columns: 250px 1fr;
+            gap: 2rem;
+            background: var(--bg-panel);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            overflow: hidden;
+            min-height: 400px;
+        }
+
+        .cmd-sidebar {
+            background: rgba(255,255,255,0.02);
+            padding: 2rem;
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .cmd-tab {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            text-align: left;
+            padding: 12px 16px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            transition: 0.2s;
+        }
+
+        .cmd-tab:hover { color: var(--text-main); background: rgba(255,255,255,0.05); }
+        .cmd-tab.active { background: var(--primary); color: white; box-shadow: 0 4px 15px rgba(58, 134, 255, 0.3); }
+
+        .cmd-content { padding: 2rem; overflow-y: auto; max-height: 500px; }
+
+        .cmd-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 1rem;
+        }
+
+        .cmd-card {
+            background: rgba(0,0,0,0.3);
+            border: 1px solid var(--border);
+            padding: 1rem;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .cmd-card:hover { border-color: var(--secondary); background: rgba(58, 134, 255, 0.05); }
+        .cmd-card code { color: var(--secondary); font-weight: 700; font-size: 1.1em; display: block; margin-bottom: 5px; }
+        .cmd-card span { font-size: 0.85rem; color: var(--text-muted); }
+
+        /* --- Support Section --- */
+        .support-container {
+            background: rgba(58, 134, 255, 0.05);
+            border: 1px solid rgba(58, 134, 255, 0.2);
+            border-radius: 30px;
+            padding: 3rem;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .dev-icon {
+            font-size: 3rem;
+            color: var(--secondary);
+            margin-bottom: 10px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.1); opacity: 0.8; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        /* --- Footer --- */
+        footer {
+            padding: 80px 5% 40px;
+            border-top: 1px solid var(--border);
+            margin-top: 80px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: linear-gradient(to top, rgba(58, 134, 255, 0.05), transparent);
+        }
+
+        .social-box {
+            display: flex;
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+
+        .social-item {
+            width: 45px; height: 45px;
+            border-radius: 12px;
+            background: var(--bg-panel);
+            border: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+            transition: 0.3s;
+        }
+
+        .social-item:hover {
+            background: var(--text-main);
+            color: var(--bg-dark);
+            transform: translateY(-3px);
+        }
+
+        /* --- Toast --- */
+        .toast {
+            position: fixed;
+            top: 100px; right: 20px;
+            background: var(--bg-dark);
+            border: 1px solid var(--secondary);
+            color: var(--text-main);
+            padding: 12px 24px;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+            transform: translateX(150%);
+            transition: 0.4s;
+            z-index: 2000;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .toast.show { transform: translateX(0); }
+
+        /* --- MOBILE VIEW FIXES --- */
+        @media (max-width: 900px) {
+            .nav-links {
+                position: fixed;
+                top: 0; right: -100%;
+                width: 70%;
+                height: 100vh;
+                background: #050507;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                border-radius: 0;
+                border-left: 1px solid var(--border);
+                transition: 0.4s ease;
+                z-index: 1000;
+            }
+
+            .nav-links.active { right: 0; }
+
+            .menu-toggle { display: block; }
+
+            .hero { flex-direction: column; text-align: center; padding-top: 150px; }
+            .hero-content { margin-bottom: 50px; }
+            .hero-btns { justify-content: center; }
+            .hero h1 { font-size: 3rem; }
+            .hero-visual { width: 100%; height: 350px; }
+
+            .cmd-section { grid-template-columns: 1fr; }
+            .cmd-sidebar { flex-direction: row; overflow-x: auto; padding: 1rem; white-space: nowrap; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <a href="#" class="logo">
+            <img src="gojo.png" alt="Gojo">
+            /gojo
+        </a>
+
+        <div class="menu-toggle" onclick="toggleMenu()">
+            <i class="fas fa-bars"></i>
+        </div>
+
+        <div class="nav-links" id="navLinks">
+            <a href="#features" onclick="toggleMenu()">Features</a>
+            <a href="#game" onclick="toggleMenu()">Mini Game</a>
+            <a href="#commands" onclick="toggleMenu()">Commands</a>
+            <a href="#support" onclick="toggleMenu()">Support</a>
+        </div>
+
+        <a href="https://discord.com/oauth2/authorize?client_id=1093568533335650364&permissions=8&integration_type=0&scope=bot" 
+           class="btn btn-primary desktop-btn" target="_blank" style="display: none;">
+           Add to Server
+        </a>
+        <style> @media(min-width: 901px) { .desktop-btn { display: inline-flex !important; } } </style>
+    </nav>
+
+    <section class="hero">
+        <div class="hero-blob"></div>
+
+        <div class="hero-content">
+            <div class="status-badge">
+                <div class="status-dot"></div>
+                v2.0 Now Online & Ready
+            </div>
+            <h1>The Ultimate<br>Server Companion.</h1>
+            <p>Cool, secure, and always active. Equip your community with advanced moderation, private VCs, and engagement tools.</p>
+
+            <div class="hero-btns" style="display: flex; gap: 15px;">
+                <a href="https://discord.com/oauth2/authorize?client_id=1093568533335650364&permissions=8&integration_type=0&scope=bot" class="btn btn-primary" target="_blank">
+                    <i class="fab fa-discord"></i> Invite Bot
+                </a>
+                <a href="https://discord.gg/MpPyx75a7v" class="btn btn-secondary" target="_blank">
+                    <i class="fas fa-headset"></i> Support
+                </a>
+            </div>
+        </div>
+
+        <div class="hero-visual">
+            <div class="float-card card-2"></div>
+            <div class="float-card card-1">
+                <div class="card-1-content">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 20px;">
+                        <span>Server Status</span>
+                        <span style="color: var(--secondary);">ONLINE</span>
+                    </div>
+                    <div class="mock-bar"><div class="mock-fill"></div></div>
+                    <div class="mock-bar" style="width: 80%"><div class="mock-fill" style="width: 50%; animation-delay: 0.5s;"></div></div>
+                    <div class="mock-bar" style="width: 90%"><div class="mock-fill" style="width: 70%; animation-delay: 1s;"></div></div>
+                    <div style="margin-top: 20px; font-size: 0.8rem; color: rgba(255,255,255,0.5);">
+                        > System initialized...<br>
+                        > /gojo ready to serve.<br>
+                        > Listening for commands...
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="features" class="section">
+        <div class="section-header">
+            <h2>System Capabilities</h2>
+            <p style="color: var(--text-muted);">Built for performance and engagement.</p>
+            <div class="line"></div>
+        </div>
+
+        <div class="features-grid">
+            <div class="feature-box">
+                <div class="f-icon"><i class="fas fa-user-lock"></i></div>
+                <h3>Private Voice</h3>
+                <p style="color: var(--text-muted); font-size: 0.95rem;">Empower users to create temporary, fully customizable voice channels instantly.</p>
+            </div>
+            <div class="feature-box">
+                <div class="f-icon"><i class="fas fa-gamepad"></i></div>
+                <h3>Entertainment</h3>
+                <p style="color: var(--text-muted); font-size: 0.95rem;">Keep chat alive with memes, fun, games, and social interactions.</p>
+            </div>
+            <div class="feature-box">
+                <div class="f-icon"><i class="fas fa-shield-alt"></i></div>
+                <h3>Secure Mod</h3>
+                <p style="color: var(--text-muted); font-size: 0.95rem;">Advanced automod and manual tools to keep your community safe.</p>
+            </div>
+            <div class="feature-box">
+                <div class="f-icon"><i class="fas fa-gift"></i></div>
+                <h3>Giveaways</h3>
+                <p style="color: var(--text-muted); font-size: 0.95rem;">Start, reroll, and manage giveaways with a single command.</p>
+            </div>
+            <div class="feature-box">
+                <div class="f-icon"><i class="fas fa-ticket-alt"></i></div>
+                <h3>Support Tickets</h3>
+                <p style="color: var(--text-muted); font-size: 0.95rem;">Streamlined support channels with transcript logging.</p>
+            </div>
+            <div class="feature-box">
+                <div class="f-icon"><i class="fas fa-door-open"></i></div>
+                <h3>Welcome System</h3>
+                <p style="color: var(--text-muted); font-size: 0.95rem;">Greet new members with customizable cards and auto-roles.</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="game" class="section">
+        <div class="game-wrapper">
+            <h2 style="margin-bottom: 10px;">Interaction Zone</h2>
+            <p style="color: var(--text-muted);">Catch the treats (🐟 & 🥛), dodge the water!</p>
+            <h3 style="color: var(--secondary); margin-top: 15px; font-family: monospace; font-size: 1.5rem;">SCORE: <span id="score">0</span></h3>
+
+            <div class="game-area" id="gameArea">
+                <div class="player" id="player">😺</div>
+                <div class="game-overlay" id="startScreen">
+                    <h3 style="margin-bottom: 10px;">Ready Player One?</h3>
+                    <button class="btn btn-primary" onclick="startGame()">Start Game</button>
+                </div>
+                <div class="game-overlay" id="gameOverScreen" style="display: none;">
+                    <h3 style="margin-bottom: 10px;">Game Over!</h3>
+                    <p style="color: #ccc; margin-bottom: 20px;">Score: <span id="finalScore">0</span></p>
+                    <button class="btn btn-primary" onclick="startGame()">Retry</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="commands" class="section">
+        <div class="section-header">
+            <h2>Command List</h2>
+            <div class="line"></div>
+        </div>
+
+        <div class="cmd-section">
+            <div class="cmd-sidebar">
+                <button class="cmd-tab active" onclick="switchTab('fun', this)"><i class="fas fa-smile"></i> Fun</button>
+                <button class="cmd-tab" onclick="switchTab('giveaway', this)"><i class="fas fa-gift"></i> Giveaway</button>
+                <button class="cmd-tab" onclick="switchTab('moderation', this)"><i class="fas fa-gavel"></i> Moderation</button>
+                <button class="cmd-tab" onclick="switchTab('utility', this)"><i class="fas fa-tools"></i> Utility</button>
+            </div>
+            <div class="cmd-content">
+                <div id="commandList" class="cmd-grid">
+                    </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="support" class="section">
+        <div class="support-container">
+            <div class="dev-icon">
+                <i class="fas fa-code"></i>
+            </div>
+            <h2>Bot Under Development</h2>
+            <p style="max-width: 600px; color: var(--text-muted);">
+                /gojo is currently in active development. You might encounter bugs or incomplete features. 
+                We appreciate your patience and feedback!
+            </p>
+            <a href="https://discord.gg/MpPyx75a7v" class="btn btn-primary" target="_blank" style="margin-top: 1rem;">
+                <i class="fab fa-discord"></i> Join Support Server
+            </a>
+        </div>
+    </section>
+
+    <footer>
+        <div class="logo" style="margin-bottom: 1rem;">/gojo</div>
+        <p style="color: var(--text-muted);">Crafted with 💙 by csf1en.</p>
+
+        <div class="social-box">
+            <a href="https://discord.gg/MpPyx75a7v" target="_blank" class="social-item"><i class="fab fa-discord"></i></a>
+            <a href="https://x.com/csf1en" target="_blank" class="social-item"><i class="fab fa-twitter"></i></a>
+            <a href="https://github.com/csf1en" target="_blank" class="social-item"><i class="fab fa-github"></i></a>
+        </div>
+
+        <p style="color: rgba(255,255,255,0.2); font-size: 0.8rem;">© 2025 csf1en. All rights reserved.</p>
+    </footer>
+
+    <div class="toast" id="toast">
+        <i class="fas fa-check-circle" style="color: var(--secondary);"></i> 
+        <span>Copied to clipboard!</span>
+    </div>
+
+    <script>
+        // --- MOBILE MENU TOGGLE ---
+        function toggleMenu() {
+            const nav = document.getElementById('navLinks');
+            nav.classList.toggle('active');
+        }
+
+        // --- COMMANDS ---
+        const commandData = {
+            fun: [
+                { cmd: '/meme', desc: 'Get a random meme' },
+                { cmd: '/pet', desc: 'Pet the kitty' },
+                { cmd: '/8ball', desc: 'Ask a magic question' },
+                { cmd: '/ship', desc: 'Match two users' },
+                { cmd: '/cat', desc: 'Random cute cat pic' },
+                { cmd: '/coinflip', desc: 'Flip a coin' }
+            ],
+            giveaway: [
+                { cmd: '/gstart', desc: 'Start a new giveaway' },
+                { cmd: '/gend', desc: 'End current giveaway' },
+                { cmd: '/greroll', desc: 'Reroll a winner' },
+                { cmd: '/glist', desc: 'List active giveaways' }
+            ],
+            moderation: [
+                { cmd: '/kick', desc: 'Kick a user' },
+                { cmd: '/ban', desc: 'Ban a user' },
+                { cmd: '/mute', desc: 'Mute a user' },
+                { cmd: '/purge', desc: 'Delete multiple messages' },
+                { cmd: '/warn', desc: 'Warn a user' }
+            ],
+            utility: [
+                { cmd: '/ping', desc: 'Check bot latency' },
+                { cmd: '/serverinfo', desc: 'View server details' },
+                { cmd: '/userinfo', desc: 'View user details' },
+                { cmd: '/avatar', desc: 'Get user avatar' },
+                { cmd: '/help', desc: 'See all commands' }
+            ]
+        };
+
+        const commandListEl = document.getElementById('commandList');
+
+        function switchTab(category, btn) {
+            document.querySelectorAll('.cmd-tab').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            renderCommands(category);
+        }
+
+        function renderCommands(category) {
+            commandListEl.innerHTML = '';
+            const commands = commandData[category];
+            commands.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'cmd-card';
+                div.onclick = () => copyCommand(item.cmd);
+                div.innerHTML = `<code>${item.cmd}</code><span>${item.desc}</span>`;
+                commandListEl.appendChild(div);
+            });
+        }
+
+        window.onload = () => {
+            renderCommands('fun');
+        };
+
+        function copyCommand(text) {
+            navigator.clipboard.writeText(text);
+            const toast = document.getElementById('toast');
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 2000);
+        }
+
+        // --- GAME LOGIC ---
+        const gameArea = document.getElementById('gameArea');
+        const player = document.getElementById('player');
+        const scoreEl = document.getElementById('score');
+        const startScreen = document.getElementById('startScreen');
+        const gameOverScreen = document.getElementById('gameOverScreen');
+        let gameActive = false;
+        let score = 0;
+        let gameInterval;
+        let spawnInterval;
+
+        function updatePlayerPosition(clientX) {
+            if (!gameActive) return;
+            const rect = gameArea.getBoundingClientRect();
+            let x = clientX - rect.left;
+            if (x < 20) x = 20;
+            if (x > rect.width - 20) x = rect.width - 20;
+            player.style.left = x + 'px';
+            player.style.top = '250px'; 
+        }
+
+        document.addEventListener('mousemove', (e) => {
+            updatePlayerPosition(e.clientX);
+        });
+
+        gameArea.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+            updatePlayerPosition(e.touches[0].clientX);
+        }, { passive: false });
+
+        function startGame() {
+            gameActive = true;
+            score = 0;
+            scoreEl.innerText = score;
+            startScreen.style.display = 'none';
+            gameOverScreen.style.display = 'none';
+            document.querySelectorAll('.item').forEach(e => e.remove());
+            spawnInterval = setInterval(spawnItem, 800);
+            gameInterval = setInterval(gameLoop, 20);
+        }
+
+        function spawnItem() {
+            if (!gameActive) return;
+            const item = document.createElement('div');
+            item.classList.add('item');
+            const type = Math.random() > 0.3 ? 'treat' : 'danger';
+            item.innerText = type === 'treat' ? (Math.random() > 0.5 ? '🐟' : '🥛') : '💧';
+            item.dataset.type = type;
+            item.style.left = Math.random() * (gameArea.clientWidth - 40) + 'px';
+            item.style.top = '0px'; 
+            gameArea.appendChild(item);
+        }
+
+        function gameLoop() {
+            if (!gameActive) return;
+            const items = document.querySelectorAll('.item');
+            const playerRect = player.getBoundingClientRect();
+
+            items.forEach(item => {
+                let top = parseFloat(item.style.top);
+                top += 4; 
+                item.style.top = top + 'px';
+                const itemRect = item.getBoundingClientRect();
+
+                if (
+                    itemRect.top < playerRect.bottom &&
+                    itemRect.bottom > playerRect.top &&
+                    itemRect.right > playerRect.left &&
+                    itemRect.left < playerRect.right
+                ) {
+                    if (item.dataset.type === 'treat') {
+                        score += 10;
+                        scoreEl.innerText = score;
+                        item.remove();
+                    } else {
+                        endGame();
+                    }
+                }
+                if (top > 320) item.remove();
+            });
+        }
+
+        function endGame() {
+            gameActive = false;
+            clearInterval(spawnInterval);
+            clearInterval(gameInterval);
+            document.getElementById('finalScore').innerText = score;
+            gameOverScreen.style.display = 'flex';
+        }
+    </script>
+</body>
+</html>
